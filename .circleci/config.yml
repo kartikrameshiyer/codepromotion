@@ -16,6 +16,7 @@ jobs:
           aws cloudformation deploy \
           --template-file bucket.yml \
           --stack-name "${CIRCLE_WORKFLOW_ID}" \
+          --region us-west-2 \
           --parameter-overrides NAME="${CIRCLE_WORKFLOW_ID}"
       - run: aws s3 sync . s3://"${CIRCLE_WORKFLOW_ID}" --delete
   get_pipiline_id:
@@ -27,7 +28,7 @@ jobs:
           name: getting the pipelineid
           command: |
             aws cloudformation \
-            list-exports --query "Exports[?Name==\`PipelineID\`].Value" \
+            list-exports --region us-west-2 --query "Exports[?Name==\`PipelineID\`].Value" \
             --no-paginate --output text  >> ~/output.txt
             cat ~/output.txt
       - persist_to_workspace:
@@ -44,6 +45,7 @@ jobs:
           aws cloudformation deploy \
             --template-file cloudfront.yml \
             --stack-name production-distro \
+            --region us-west-2 \
             --parameter-overrides PipelineID="${CIRCLE_WORKFLOW_ID}"
   clean_up_old_code:
     docker:
@@ -52,7 +54,7 @@ jobs:
       - checkout
       - run: |
           aws s3 rm "s3://${OldPipelineID}" --recursive
-          aws cloudformation delete-stack --stack-name "${PreviousPipelineID}"
+          aws cloudformation delete-stack --stack-name "${PreviousPipelineID}" --region us-west-2
       - attach_workspace:
           at: ~/
   # Name the workflow "welcome"
