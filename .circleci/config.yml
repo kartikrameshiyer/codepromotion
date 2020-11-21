@@ -70,7 +70,7 @@ jobs:
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
       - run: |
           aws s3 rm "s3://${OldPipelineID}" --recursive
-          aws cloudformation delete-stack --stack-name "${PreviousPipelineID}" --region us-west-2
+          aws cloudformation delete-stack --stack-name "bucket-${PreviousPipelineID}" --region us-west-2
       - attach_workspace:
           at: ~/
   # Name the workflow "welcome"
