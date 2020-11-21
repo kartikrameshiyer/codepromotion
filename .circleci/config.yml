@@ -4,7 +4,15 @@ version: 2.1
 orbs:
   # Declare a dependency on the welcome-orb
   welcome: circleci/welcome-orb@0.4.1
-
+destroy_environment:
+  description: " Commands to delete the stack in case there is a failure "
+  parameters:
+  steps:
+    - run:
+        name: Delete the stack
+        when: on_fail
+        command: |
+          aws cloudformation delete-stack --stack-name bucket-${CIRCLE_WORKFLOW_ID:0:7} --region us-west-2
 # Orchestrate or schedule a set of jobs
 jobs:
   create_and_deploy:
@@ -19,6 +27,7 @@ jobs:
           --region us-west-2 \
           --parameter-overrides "NAME=bucket-${CIRCLE_WORKFLOW_ID:0:7}"
       - run: aws s3 sync . s3://"bucket-${CIRCLE_WORKFLOW_ID:0:7}" --delete
+      - destroy_environment
   get_pipiline_id:
     docker:
       - image: amazon/aws-cli
@@ -66,13 +75,17 @@ jobs:
       - checkout
       - run:
           command: |
+            yum install tar -y
+            yum install gzip -y
+      - attach_workspace:
+          at: ~/output.txt
+      - run:
+          command: |
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
       - run: |
-          aws s3 rm "s3://${OldPipelineID}" --recursive
-          aws cloudformation delete-stack --stack-name "bucket-${PreviousPipelineID}" --region us-west-2
-      - attach_workspace:
-          at: ~/
+          aws s3 rb "s3://bucket-${CIRCLE_WORKFLOW_ID:0:7}" --force
+          aws cloudformation delete-stack --stack-name "${PreviousPipelineID}" --region us-west-2
   # Name the workflow "welcome"
 workflows:
   welcome:
