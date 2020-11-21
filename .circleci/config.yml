@@ -88,7 +88,7 @@ jobs:
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
       - run: |
           aws s3 rb "s3://bucket-${CIRCLE_WORKFLOW_ID:0:7}" --force
-          aws cloudformation delete-stack --stack-name "${PreviousPipelineID}" --region us-west-2
+          aws cloudformation delete-stack --stack-name "bucket-${CIRCLE_WORKFLOW_ID:0:7}" --region us-west-2
   # Name the workflow "welcome"
 workflows:
   welcome:
