@@ -24,6 +24,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - run: yum install tar
       - run:
           command: |
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
