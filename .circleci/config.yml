@@ -14,11 +14,11 @@ jobs:
       - checkout
       - run: |
           aws cloudformation deploy \
-          --template-file file://bucket.yml \
-          --stack-name "${CIRCLE_WORKFLOW_ID:0:7}" \
+          --template-file bucket.yml \
+          --stack-name "bucket-${CIRCLE_WORKFLOW_ID:0:7}" \
           --region us-west-2 \
-          --parameter-overrides "NAME=${CIRCLE_WORKFLOW_ID:0:7}"
-      - run: aws s3 sync . s3://"${CIRCLE_WORKFLOW_ID:0:7}" --delete
+          --parameter-overrides "NAME=bucket-${CIRCLE_WORKFLOW_ID:0:7}"
+      - run: aws s3 sync . s3://"bucket-${CIRCLE_WORKFLOW_ID:0:7}" --delete
   get_pipiline_id:
     docker:
       - image: amazon/aws-cli
